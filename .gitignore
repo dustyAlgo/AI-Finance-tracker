@@ -16,9 +16,8 @@ __pycache__/
 *.pot
 
 # Virtual environments
-venv/
-env/
-.venv/
+env1/
+
 
 # Django secrets
 .env

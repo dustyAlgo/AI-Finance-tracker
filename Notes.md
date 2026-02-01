@@ -1,3 +1,8 @@
+SuperUser Email: test@email.com Username: Test, Password: Test123
+New User:
+    "username": "newuser",
+    "email": "newuser@email.com",
+    "password": "newuser123"
 🧠 BACKEND (Django + DRF + LangChain)
 backend/
 │
