@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'rest_framework',
     'accounts',
+    'finance',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'

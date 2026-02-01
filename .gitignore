@@ -17,6 +17,7 @@ __pycache__/
 
 # Virtual environments
 env1/
+tokens.txt
 
 
 # Django secrets
