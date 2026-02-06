@@ -23,6 +23,35 @@ class TransactionSerializer(serializers.ModelSerializer):
             'anomaly_z_score',
         ]
 
+    def create(self, validated_data):
+        """
+        If user provides category → keep it as final.
+        Else → assign predicted category.
+        """
+        transaction = super().create(validated_data)
+
+        if not transaction.category and transaction.predicted_category:
+            transaction.category = transaction.predicted_category
+            transaction.save(update_fields=["category"])
+
+        return transaction
+
+    def update(self, instance, validated_data):
+        """
+        If user updates category → it overrides prediction.
+        """
+        transaction = super().update(instance, validated_data)
+
+        if transaction.category:
+            # User override: keep predicted as reference only
+            pass
+        elif transaction.predicted_category:
+            transaction.category = transaction.predicted_category
+            transaction.save(update_fields=["category"])
+
+        return transaction
+
+
 
 class CategorySerializer(serializers.ModelSerializer):
 

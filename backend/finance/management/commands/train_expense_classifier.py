@@ -36,7 +36,7 @@ class Command(BaseCommand):
             if not cleaned:
                 continue
             texts.append(cleaned)
-            labels.append(tx.category_id)
+            labels.append(tx.category.name.lower())
 
         if len(set(labels)) < 2:
             self.stdout.write(
