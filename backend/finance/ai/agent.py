@@ -96,4 +96,23 @@ def run_finance_agent(user_id: int, year: int, month: int) -> str:
     if not messages:
         return "No response generated."
 
-    return messages[-1].content
+    raw_output = messages[-1].content
+
+    # Clean reasoning traces
+    markers = [
+        "**Feb",
+        "**Category Analysis",
+        "**Insights",
+        "**Actionable Tips",
+        "**3 Actionable Tips",
+    ]
+
+    clean_output = raw_output
+    for marker in markers:
+        idx = raw_output.find(marker)
+        if idx != -1:
+            clean_output = raw_output[idx:]
+            break
+
+    return clean_output.strip()
+

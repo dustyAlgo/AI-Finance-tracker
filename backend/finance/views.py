@@ -8,6 +8,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from .ml.inference import predict_category
 from finance.ml.anomaly_service import compute_z_score
+from .serializers import MonthlyAISummaryRequestSerializer
+from finance.ai.agent import run_finance_agent
+from rest_framework.permissions import IsAuthenticated
 
 
 
@@ -79,3 +82,28 @@ class PredictCategoryView(APIView):
             {"predicted_category": predicted_category_id},
             status=status.HTTP_200_OK
 )
+
+class MonthlyAISummaryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = MonthlyAISummaryRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        year = serializer.validated_data["year"]
+        month = serializer.validated_data["month"]
+        user_id = request.user.id
+
+        try:
+            summary = run_finance_agent(
+                user_id=user_id,
+                year=year,
+                month=month
+            )
+            return Response({"summary": summary})
+
+        except Exception:
+            return Response(
+                {"error": "AI service unavailable"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

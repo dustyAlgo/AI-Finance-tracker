@@ -3,7 +3,8 @@ from .views import (
     CategoryListCreateView,
     TransactionListCreateView,
     TransactionDetailView,
-    PredictCategoryView,   # NEW
+    PredictCategoryView,
+    MonthlyAISummaryView,   # NEW
 )
 
 
@@ -12,4 +13,6 @@ urlpatterns = [
     path('transactions/', TransactionListCreateView.as_view()),
     path('transactions/<int:pk>/', TransactionDetailView.as_view()),
     path('transactions/predict-category/', PredictCategoryView.as_view()),
+    path("ai/monthly-summary/", MonthlyAISummaryView.as_view()),
+
 ]
