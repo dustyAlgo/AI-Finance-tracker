@@ -1,25 +1,18 @@
-import langchain.agents as agents
-print("001",[attr for attr in dir(agents) if 'type' in attr.lower() or 'agent' in attr.lower()])
+import os
+import sys
+import django
 
-# Check if AgentType is in a different module
-import langchain.agents
-print(002, [attr for attr in dir(langchain.agents) if not attr.startswith('_')])
+# Add the project root to Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-# Check if there's an agent_types module
+# Setup Django environment
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
+django.setup()
+# test_agent.py
+from finance.ai.agent import run_finance_agent
 try:
-    from langchain.agents import agent_types
-    print(003, [attr for attr in dir(agent_types)])
-except ImportError:
-    print("No agent_types module found")
+    result = run_finance_agent(123, 2026, 2)
+    print("✅ SUCCESS:", result[:200])
+except Exception as e:
+    print("❌ ERROR:", str(e))
 
-# Check what's in the factory module
-try:
-    from langchain.agents import factory
-    print(004, [attr for attr in dir(factory)])
-except ImportError:
-    print("Factory module contents not accessible")
-
-    # Check what's in the create_agent function signature
-import inspect
-from langchain.agents import create_agent
-print(inspect.signature(create_agent))

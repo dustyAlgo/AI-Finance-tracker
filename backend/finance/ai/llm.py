@@ -20,8 +20,8 @@ def call_llama(prompt: str) -> str:
                 "content": prompt
             }
         ],
-        max_tokens=300,
-        temperature=0.3,
+        max_tokens=512,
+        temperature=0.2,
     )
 
     return completion.choices[0].message.content
