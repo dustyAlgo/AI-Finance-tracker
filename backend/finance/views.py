@@ -11,6 +11,10 @@ from finance.ml.anomaly_service import compute_z_score
 from .serializers import MonthlyAISummaryRequestSerializer
 from finance.ai.agent import run_finance_agent
 from rest_framework.permissions import IsAuthenticated
+from finance.services.summary_service import (
+    get_monthly_summary,
+    get_category_spending,
+)
 
 
 
@@ -107,3 +111,44 @@ class MonthlyAISummaryView(APIView):
                 {"error": "AI service unavailable"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+class MonthlySummaryAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        year = request.query_params.get("year")
+        month = request.query_params.get("month")
+        try:
+            year = int(year)
+            month = int(month)
+            if not (1 <= month <= 12):
+                raise ValueError
+        except Exception:
+            return Response(
+                {"detail": "Query params `year` and `month` (1-12) are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        summary = get_monthly_summary(user=request.user, year=year, month=month)
+        return Response({"summary": summary}, status=status.HTTP_200_OK)
+
+
+class CategoryBreakdownAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        year = request.query_params.get("year")
+        month = request.query_params.get("month")
+        try:
+            year = int(year)
+            month = int(month)
+            if not (1 <= month <= 12):
+                raise ValueError
+        except Exception:
+            return Response(
+                {"detail": "Query params `year` and `month` (1-12) are required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        breakdown = get_category_spending(user=request.user, year=year, month=month)
+        return Response({"breakdown": breakdown}, status=status.HTTP_200_OK)

@@ -4,7 +4,9 @@ from .views import (
     TransactionListCreateView,
     TransactionDetailView,
     PredictCategoryView,
-    MonthlyAISummaryView,   # NEW
+    MonthlyAISummaryView,
+    CategoryBreakdownAPIView,
+    MonthlySummaryAPIView,   # NEW
 )
 
 
@@ -14,5 +16,7 @@ urlpatterns = [
     path('transactions/<int:pk>/', TransactionDetailView.as_view()),
     path('transactions/predict-category/', PredictCategoryView.as_view()),
     path("ai/monthly-summary/", MonthlyAISummaryView.as_view()),
+    path("monthly-summary/", MonthlySummaryAPIView.as_view()),
+    path("category-breakdown/", CategoryBreakdownAPIView.as_view()),
 
 ]

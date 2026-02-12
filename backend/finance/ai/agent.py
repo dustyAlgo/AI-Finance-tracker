@@ -1,13 +1,15 @@
 from langchain.agents import create_agent
 from langchain_core.language_models import LLM
 from typing import Optional, List, Dict, Any, Sequence
+from finance.services.summary_service import get_monthly_summary, get_category_spending
+from django.contrib.auth import get_user_model
+import json
 
 from finance.ai.tools import (
     get_monthly_summary_tool,
     get_category_spending_tool,
 )
 from finance.ai.llm import call_llama
-
 
 class LlamaLLM(LLM):
     @property
@@ -29,90 +31,33 @@ class LlamaLLM(LLM):
 
 
 def run_finance_agent(user_id: int, year: int, month: int) -> str:
+    User = get_user_model()
+       
+    # 1. ACTUALLY CALL YOUR TOOLS
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return "User not found."
+    
+    summary = get_monthly_summary(user, year, month)
+    categories = get_category_spending(user, year, month)
+    
+    # 2. LLM ANALYSIS ONLY (no tool hallucination possible)
+    prompt = f"""
+    Analyze this EXACT financial data for user_id={user_id}, {year}-{month:02d}:
+    
+    SUMMARY: {json.dumps(summary)}
+    CATEGORIES: {json.dumps(categories)}
+    
+    Generate insights using these rules ONLY:
+    - Income vs expenses ratio and keep all values in Indian Rupee
+    - Food > 25% expenses? → "High food spending"  
+    - Rent > 40% expenses? → "High rent burden"
+    - Travel > 10% expenses? → "Reduce travel"
+    - Savings < 20% income? → "Increase savings"
+    
+    If all zeros: "No transactions found for this period"
     """
-    Runs the finance AI agent using LangChain 1.2.9 create_agent API.
-    """
-
-    llm = LlamaLLM()
-
-    tools = [
-        get_monthly_summary_tool,
-        get_category_spending_tool,
-    ]
-
-    agent_graph = create_agent(
-        model=llm,
-        tools=tools,
-        system_prompt=(
-             """You are a PERSONAL FINANCIAL ANALYST for Indian users. 
-
-                ## STRICT RULES:
-                1. You HAVE financial data via TOOLS - NEVER ask for user data
-                2. ONLY use data from get_monthly_summary_tool and get_category_spending_tool
-                3. NEVER mention external sources (BLS/FRED/IRS) - you have NO internet
-                4. Indian rupees (₹) ONLY - no USD conversion
-                5. If tools return empty data: "No transactions found for this period"
-
-                ## REAct FORMAT - YOU MUST FOLLOW:
-                Thought: Analyze what tools to call
-                Action: get_monthly_summary_tool OR get_category_spending_tool
-                Action Input: {"user_id": 53, "year": 2025, "month": 2}
-
-                ## INSIGHTS TO GIVE (SIMPLE):
-                - Income vs expenses ratio
-                - Food > 25% expenses? → "High food spending"
-                - Rent > 40% expenses? → "High rent burden" 
-                - Travel > 10% expenses? → "Reduce travel"
-                - Savings < 20% income? → "Increase savings"
-
-                ## SAMPLE OUTPUT FORMAT:
-                **Feb 2025 Summary**
-                Income: ₹80,000 | Expenses: ₹65,000 | Savings: ₹15,000 (19%)
-
-                **Category Analysis:**
-                - Food: ₹18,000 (28%) ← HIGH - cut dining out
-                - Rent: ₹25,000 (38%) ← HIGH - negotiate lease
-                - Travel: ₹12,000 (18%) ← HIGH - use public transport
-
-                **3 Actionable Tips:**
-                1. Reduce food spending by ₹5,000/month
-                2. Cook at home 4 days/week  
-                3. Cancel unused subscriptions"""
-        ),
-    )
-
-    query = (
-        f"Generate financial summary for user_id={user_id}, "
-        f"year={year}, month={month}. "
-        f"Include summary and 3 actionable suggestions."
-    )
-
-    result = agent_graph.invoke({
-        "input": query
-    })
-
-    # Safely extract final message
-    messages = result.get("messages", [])
-    if not messages:
-        return "No response generated."
-
-    raw_output = messages[-1].content
-
-    # Clean reasoning traces
-    markers = [
-        "**Feb",
-        "**Category Analysis",
-        "**Insights",
-        "**Actionable Tips",
-        "**3 Actionable Tips",
-    ]
-
-    clean_output = raw_output
-    for marker in markers:
-        idx = raw_output.find(marker)
-        if idx != -1:
-            clean_output = raw_output[idx:]
-            break
-
-    return clean_output.strip()
-
+    
+    analysis = call_llama(prompt)
+    return analysis

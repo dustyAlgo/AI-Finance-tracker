@@ -1,4 +1,4 @@
-from langchain.tools import tool
+from langchain_core.tools import tool
 from finance.services.summary_service import (
     get_monthly_summary,
     get_category_spending,
