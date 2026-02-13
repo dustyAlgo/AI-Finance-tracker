@@ -48,15 +48,15 @@ def run_finance_agent(user_id: int, year: int, month: int) -> str:
     
     SUMMARY: {json.dumps(summary)}
     CATEGORIES: {json.dumps(categories)}
-    
-    Generate insights using these rules ONLY:
+    Keep the response short and concise and the response should only contain natural language. 
+    Generate insights using these data values only:
     - Income vs expenses ratio and keep all values in Indian Rupee
-    - Food > 25% expenses? → "High food spending"  
-    - Rent > 40% expenses? → "High rent burden"
-    - Travel > 10% expenses? → "Reduce travel"
-    - Savings < 20% income? → "Increase savings"
-    
+    - Food expense percentage in total expenses: Food expense > 25% expenses? → "High food spending" 
+    - Rent expense percentage in total expenses: Rent > 40% expenses? → "High rent burden"
+    - Travel expenses % in total expense: Travel > 10% expenses? → "Reduce travel"
+    - Savings expense % in Total income: Savings < 20% income? → "Increase savings"
     If all zeros: "No transactions found for this period"
+    
     """
     
     analysis = call_llama(prompt)
