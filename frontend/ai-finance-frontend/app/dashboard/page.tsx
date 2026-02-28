@@ -174,7 +174,7 @@ const COLORS = [
                     ))}
                   </Pie>
                   <Tooltip />
-                  <Legend />
+                  <Legend verticalAlign="bottom" wrapperStyle={{ transform: "translateY(-12px)" }} />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -182,7 +182,7 @@ const COLORS = [
             {/* AI Section */}
             <div className="bg-gray-100 p-6 text-purple-400 rounded shadow space-y-4">
               <h3 className="font-semibold">
-                🤖 AI Financial Analysis
+                🤖 AI Section - Financial Help?
               </h3>
 
               <button
@@ -200,12 +200,12 @@ const COLORS = [
                     Generating...
                   </>
                 ) : (
-                  "Generate AI Report"
+                  "Ask AI"
                 )}
               </button>
 
 
-              {loadingAI && <p>Generating AI insights...</p>}
+              {loadingAI && <p>Ask AI insights...</p>}
 
               {aiReport && (
                 <div className="bg-white p-4 text-black rounded whitespace-pre-wrap">
